@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0
+
+- Added docstrings
+- Renamed Result -> AABBPair
+
 ## 0.0.3
 
 - Added Touch to example

@@ -20,7 +20,7 @@ void main() {
     Object foo = Object();
     World world = World(1024, 1024);
     world.add(foo, AABB.xywh(x: 16, y: 16, width: 16, height: 16));
-    List<Result> collisions =
+    List<AABBPair> collisions =
         world.queryAABB(AABB.xywh(x: 16, y: 16, width: 16, height: 16));
     expect(collisions.length, 1);
     expect(collisions[0].object, foo);
@@ -30,7 +30,7 @@ void main() {
     Object foo = Object();
     World world = World(1024, 1024);
     world.add(foo, AABB.xywh(x: 16, y: 16, width: 16, height: 16));
-    List<Result> collisions = world
+    List<AABBPair> collisions = world
         .queryAABB(AABB.xywh(x: 16, y: 16, width: 16, height: 16), ignore: foo);
     expect(collisions.length, 0);
   });
@@ -39,7 +39,7 @@ void main() {
     Object foo = Object();
     World world = World(1024, 1024);
     world.add(foo, AABB.xywh(x: 16, y: 16, width: 16, height: 16));
-    List<Result> collisions =
+    List<AABBPair> collisions =
         world.queryAABB(AABB.xywh(x: 100, y: 16, width: 16, height: 16));
     expect(collisions.length, 0);
   });
@@ -48,7 +48,7 @@ void main() {
     Object foo = Object();
     World world = World(1024, 1024);
     world.add(foo, AABB.xywh(x: 16, y: 16, width: 16, height: 16));
-    List<Result> collisions =
+    List<AABBPair> collisions =
         world.queryAABB(AABB.xywh(x: 32, y: 16, width: 16, height: 16));
     expect(collisions.length, 0);
   });
@@ -58,7 +58,7 @@ void main() {
     World world = World(1024, 1024);
     world.add(foo, AABB.xywh(x: 16, y: 16, width: 16, height: 16));
     world.remove(foo);
-    List<Result> collisions =
+    List<AABBPair> collisions =
         world.queryAABB(AABB.xywh(x: 16, y: 16, width: 16, height: 16));
     expect(collisions.length, 0);
   });

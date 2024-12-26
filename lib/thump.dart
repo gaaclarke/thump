@@ -1,23 +1,45 @@
 import 'dart:collection';
 import 'dart:math';
 
+/// An axis-aligned bounding box.
 class AABB {
+  /// The lowest x value for this.
   final double x;
+
+  /// The lowest y value for this.
   final double y;
+
+  /// The width of this.
   final double width;
+
+  /// The height of this.
   final double height;
 
+  /// The highest x value for this.
   double get right => x + width;
+
+  /// The highest y value for this.
   double get bottom => y + height;
+
+  /// The x value for the center of this.
   double get centerX => x + width / 2.0;
+
+  /// The y value for the center of this.
   double get centerY => y + height / 2.0;
 
+  /// The top-left quadrant of an [AABB].
   AABB get topLeft =>
       AABB.xywh(x: x, y: x, width: width / 2, height: height / 2);
+
+  /// The top-right quadrant of an [AABB].
   AABB get topRight =>
       AABB.xywh(x: centerX, y: x, width: width / 2, height: height / 2);
+
+  /// The bottom-left quadrant of an [AABB].
   AABB get bottomLeft =>
       AABB.xywh(x: x, y: centerY, width: width / 2, height: height / 2);
+
+  /// The bottom-right quadrant of an [AABB].
   AABB get bottomRight =>
       AABB.xywh(x: centerX, y: centerY, width: width / 2, height: height / 2);
 
@@ -27,6 +49,7 @@ class AABB {
       required double this.width,
       required double this.height});
 
+  /// Returns `true` if this and [other] are overlapping (not just touching).
   bool overlaps(AABB other) {
     if (other.right <= x) {
       return false;
@@ -43,6 +66,7 @@ class AABB {
     return true;
   }
 
+  /// Returns the smallest AABB that contains both this and [aabb].
   AABB union(AABB aabb) {
     double curTop = y;
     double curBottom = bottom;
@@ -74,6 +98,7 @@ class AABB {
   }
 }
 
+/// A defined behavior to take when objects collide as a result of [World.move].
 enum Behavior {
   Slide,
   Pass,
@@ -81,16 +106,17 @@ enum Behavior {
   Touch,
 }
 
-class Result {
+class AABBPair {
   final Object object;
   final AABB aabb;
-  Result(this.object, this.aabb);
+  AABBPair(this.object, this.aabb);
 }
 
+/// A result from [World.move].
 class MoveResult {
   final double x;
   final double y;
-  final List<Result> collisions;
+  final List<AABBPair> collisions;
   MoveResult(this.x, this.y, this.collisions);
 }
 
@@ -198,11 +224,11 @@ void _add(_Node node, Object obj, AABB aabb) {
   node._entries[obj] = aabb;
 }
 
-void _queryAABB(_Node node, List<Result> results, AABB aabb, Object? ignore) {
+void _queryAABB(_Node node, List<AABBPair> results, AABB aabb, Object? ignore) {
   node._entries.forEach((obj, otherAABB) {
     if ((ignore != null && ignore != obj) || ignore == null) {
       if (aabb.overlaps(otherAABB)) {
-        results.add(Result(obj, otherAABB));
+        results.add(AABBPair(obj, otherAABB));
       }
     }
   });
@@ -261,36 +287,46 @@ Behavior _defaultBehavior(Object obj) => Behavior.Slide;
 
 double _length(double dx, double dy) => sqrt(dx * dx + dy * dy);
 
+/// An object thant holds all the information for the collision system.
 class World {
   final double width;
   final double height;
   final _Node _node;
   final HashMap<Object, AABB> _aabbs = new HashMap<Object, AABB>();
 
+  /// Creates a [World] with the given [width] and [height] dimensions.
+  /// Objects can exist out of those dimensions inefficiently.
   World(this.width, this.height)
       : _node = _Node(AABB.xywh(x: 0, y: 0, width: width, height: height));
 
+  /// Add a new [Object] to the [World] at the position specified by the [AABB].
   void add(Object obj, AABB aabb) {
     _aabbs[obj] = aabb;
     _add(_node, obj, aabb);
   }
 
+  /// Removes an [Object] from the [World] that was previously added with [add].
   void remove(Object obj) {
     _aabbs.remove(obj);
     _remove(_node, obj);
   }
 
+  /// Looks up the current [AABB] for the specified [Object].  Returns `null` if
+  /// it can't be found.
   AABB? queryObject(Object obj) {
     return _aabbs[obj];
   }
 
-  /// Returns a list of all the objects that intersect with [aabb].
-  List<Result> queryAABB(AABB aabb, {Object? ignore}) {
-    List<Result> results = [];
+  /// Returns a list of all the objects that intersect with [aabb]. The optional
+  /// argument [ignore] specifies an object that will be excluded from results.
+  List<AABBPair> queryAABB(AABB aabb, {Object? ignore}) {
+    List<AABBPair> results = [];
     _queryAABB(_node, results, aabb, ignore);
     return results;
   }
 
+  /// Resets the [AABB] associated with an [obj] that has previously been added
+  /// to the [World] with [add].
   void update(Object obj, AABB aabb) {
     AABB oldAABB = _aabbs[obj]!;
     _remove(_node, obj, hint: oldAABB);
@@ -298,6 +334,10 @@ class World {
     _aabbs[obj] = aabb;
   }
 
+  /// Moves [obj] by delta values [dx] in the x direction and [dy] in the y
+  /// direction.  Optional value [handler] can be specified to have custom
+  /// [Behavior]s set for a given collision.  If none is specified
+  /// [Behavior.Slide] is assumed.
   MoveResult move(Object obj, double dx, double dy,
       {Behavior Function(Object other) handler = _defaultBehavior}) {
     final AABB start = _aabbs[obj]!;
@@ -310,7 +350,7 @@ class World {
         width: start.width,
         height: start.height);
     final AABB union = start.union(end);
-    final List<Result> potentials = queryAABB(union, ignore: obj);
+    final List<AABBPair> potentials = queryAABB(union, ignore: obj);
     if (potentials.isEmpty) {
       resultX = start.x + dx;
       resultY = start.y + dy;
@@ -332,7 +372,7 @@ class World {
       double nextY = resultY + normDy;
       final AABB nextAABB = AABB.xywh(
           x: nextX, y: nextY, width: start.width, height: start.height);
-      for (Result potential in potentials) {
+      for (AABBPair potential in potentials) {
         if (nextAABB.overlaps(potential.aabb)) {
           collisions.add(potential.object);
           Behavior behavior = handler(potential.object);
@@ -406,6 +446,6 @@ class World {
             x: resultX, y: resultY, width: start.width, height: start.height));
 
     return MoveResult(resultX, resultY,
-        collisions.map((Object obj) => Result(obj, _aabbs[obj]!)).toList());
+        collisions.map((Object obj) => AABBPair(obj, _aabbs[obj]!)).toList());
   }
 }
