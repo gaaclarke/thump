@@ -17,6 +17,7 @@ class Ninja extends RectangleComponent with KeyboardHandler {
   bool _onPlatform = false;
   final _gravity = 9.0;
   final _jumpPower = 5.0;
+  bool _isStuck = false;
 
   @override
   FutureOr<void> onLoad() {
@@ -36,21 +37,44 @@ class Ninja extends RectangleComponent with KeyboardHandler {
   void update(double dt) {
     double dx = 0;
     double dy = _dy;
-    _dy += _gravity * dt;
-    if (keysPressed.contains(LogicalKeyboardKey.arrowRight)) {
-      dx = dt * speed;
+
+    if (!_isStuck) {
+      _dy += _gravity * dt;
+    } else {
+      _onPlatform = true;
     }
-    if (keysPressed.contains(LogicalKeyboardKey.arrowLeft)) {
-      dx = -dt * speed;
+
+    if (_isStuck && !keysPressed.contains(LogicalKeyboardKey.keyZ)) {
+      _isStuck = false;
     }
     if (_onPlatform && keysDown.contains(LogicalKeyboardKey.arrowUp)) {
       _dy = -_jumpPower;
+      _isStuck = false;
+    }
+    if (keysPressed.contains(LogicalKeyboardKey.arrowRight)) {
+      dx = dt * speed;
+      _isStuck = false;
+    }
+    if (keysPressed.contains(LogicalKeyboardKey.arrowLeft)) {
+      dx = -dt * speed;
+      _isStuck = false;
     }
 
     _onPlatform = false;
-    thump.MoveResult result = gWorld.move(this, dx, dy);
+    thump.MoveResult result = gWorld.move(this, dx, dy, handler: (Object obj) {
+      if (keysPressed.contains(LogicalKeyboardKey.keyZ)) {
+        return thump.Behavior.Touch;
+      } else {
+        return thump.Behavior.Slide;
+      }
+    });
     if (result.collisions.length > 0) {
       for (final collision in result.collisions) {
+        if (keysPressed.contains(LogicalKeyboardKey.keyZ)) {
+          _dy = 0;
+          _onPlatform = true;
+          _isStuck = true;
+        }
         if (result.y >= collision.aabb.bottom && dy <= 0) {
           _dy = 0;
         }
