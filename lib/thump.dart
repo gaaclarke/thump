@@ -315,14 +315,18 @@ class World {
       resultX = start.x + dx;
       resultY = start.y + dy;
       update(
-        obj,
-        AABB.xywh(
-            x: resultX, y: resultY, width: start.width, height: start.height));
+          obj,
+          AABB.xywh(
+              x: resultX,
+              y: resultY,
+              width: start.width,
+              height: start.height));
       return MoveResult(resultX, resultY, []);
     }
     final int steps = _length(dx, dy).ceil();
     final double normDx = dx / steps;
     final double normDy = dy / steps;
+    bool shouldBreak = false;
     for (int i = 0; i < steps; ++i) {
       double nextX = resultX + normDx;
       double nextY = resultY + normDy;
@@ -333,6 +337,36 @@ class World {
           collisions.add(potential.object);
           Behavior behavior = handler(potential.object);
           switch (behavior) {
+            case Behavior.Touch:
+              shouldBreak = true;
+              final _Edge closest = _calcClosestEdge(
+                  AABB.xywh(
+                      x: resultX,
+                      y: resultY,
+                      width: start.width,
+                      height: start.height),
+                  potential.aabb,
+                  dx,
+                  dy);
+              switch (closest) {
+                case _Edge.top:
+                  nextY = max(nextY, potential.aabb.bottom);
+                  double moveRatio = (nextY - start.y) / normDy;
+                  nextX = resultX + normDx * moveRatio;
+                case _Edge.right:
+                  nextX = min(nextX, potential.aabb.x - start.width);
+                  double moveRatio = (nextX - start.x) / normDx;
+                  nextY = resultY + normDy * moveRatio;
+                case _Edge.bottom:
+                  nextY = min(nextY, potential.aabb.y - start.height);
+                  double moveRatio = (nextY - start.y) / normDy;
+                  nextX = resultX + normDx * moveRatio;
+                case _Edge.left:
+                  nextX = max(nextX, potential.aabb.right);
+                  double moveRatio = (nextX - start.x) / normDx;
+                  nextY = resultY + normDy * moveRatio;
+              }
+              break;
             case Behavior.Slide:
               final _Edge closest = _calcClosestEdge(
                   AABB.xywh(
@@ -356,13 +390,14 @@ class World {
               break;
             case Behavior.Pass:
               break;
-            default:
-              assert(false);
+            case Behavior.Bounce:
+              throw UnimplementedError('Bounce is not implemented.');
           }
         }
       }
       resultX = nextX;
       resultY = nextY;
+      if (shouldBreak) break;
     }
 
     update(

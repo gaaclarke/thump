@@ -217,4 +217,56 @@ void main() {
       expect(queryResult.height, closeTo(16, 0.01));
     }
   });
+
+  test('simple touch - right edge', () {
+    Object block = Object();
+    Object man = Object();
+    World world = World(1024, 1024);
+    world.add(block, AABB.xywh(x: 64, y: 16, width: 16, height: 16));
+    world.add(man, AABB.xywh(x: 47.9, y: 16, width: 16, height: 16));
+    MoveResult result = world.move(man, 10, 10, handler: (obj) => Behavior.Touch);
+    expect(result.x, closeTo(48.0, 0.01));
+    expect(result.y, closeTo(16.1, 0.01));
+    expect(result.collisions.length, 1);
+    expect(result.collisions[0].object, block);
+  });
+
+  test('simple touch - left edge', () {
+    Object block = Object();
+    Object man = Object();
+    World world = World(1024, 1024);
+    world.add(block, AABB.xywh(x: 64, y: 16, width: 16, height: 16));
+    world.add(man, AABB.xywh(x: 80.1, y: 16, width: 16, height: 16));
+    MoveResult result = world.move(man, -10, 10, handler: (obj) => Behavior.Touch);
+    expect(result.x, closeTo(80.0, 0.01));
+    expect(result.y, closeTo(16.1, 0.01));
+    expect(result.collisions.length, 1);
+    expect(result.collisions[0].object, block);
+  });
+
+  test('simple touch - top edge', () {
+    Object block = Object();
+    Object man = Object();
+    World world = World(1024, 1024);
+    world.add(block, AABB.xywh(x: 64, y: 16, width: 16, height: 16));
+    world.add(man, AABB.xywh(x: 64, y: 32.1, width: 16, height: 16));
+    MoveResult result = world.move(man, 10, -10, handler: (obj) => Behavior.Touch);
+    expect(result.y, closeTo(32.0, 0.01));
+    expect(result.x, closeTo(64.1, 0.01));
+    expect(result.collisions.length, 1);
+    expect(result.collisions[0].object, block);
+  });
+
+  test('simple touch - bottom edge', () {
+    Object block = Object();
+    Object man = Object();
+    World world = World(1024, 1024);
+    world.add(block, AABB.xywh(x: 64, y: 32, width: 16, height: 16));
+    world.add(man, AABB.xywh(x: 64, y: 15.9, width: 16, height: 16));
+    MoveResult result = world.move(man, -10, 10, handler: (obj) => Behavior.Touch);
+    expect(result.y, closeTo(16.0, 0.01));
+    expect(result.x, closeTo(63.9, 0.01));
+    expect(result.collisions.length, 1);
+    expect(result.collisions[0].object, block);
+  });
 }
