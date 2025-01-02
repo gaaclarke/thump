@@ -224,7 +224,8 @@ void main() {
     World world = World(1024, 1024);
     world.add(block, AABB.xywh(x: 64, y: 16, width: 16, height: 16));
     world.add(man, AABB.xywh(x: 47.9, y: 16, width: 16, height: 16));
-    MoveResult result = world.move(man, 10, 10, handler: (obj) => Behavior.Touch);
+    MoveResult result =
+        world.move(man, 10, 10, handler: (obj) => Behavior.Touch);
     expect(result.x, closeTo(48.0, 0.01));
     expect(result.y, closeTo(16.1, 0.01));
     expect(result.collisions.length, 1);
@@ -237,7 +238,8 @@ void main() {
     World world = World(1024, 1024);
     world.add(block, AABB.xywh(x: 64, y: 16, width: 16, height: 16));
     world.add(man, AABB.xywh(x: 80.1, y: 16, width: 16, height: 16));
-    MoveResult result = world.move(man, -10, 10, handler: (obj) => Behavior.Touch);
+    MoveResult result =
+        world.move(man, -10, 10, handler: (obj) => Behavior.Touch);
     expect(result.x, closeTo(80.0, 0.01));
     expect(result.y, closeTo(16.1, 0.01));
     expect(result.collisions.length, 1);
@@ -250,7 +252,8 @@ void main() {
     World world = World(1024, 1024);
     world.add(block, AABB.xywh(x: 64, y: 16, width: 16, height: 16));
     world.add(man, AABB.xywh(x: 64, y: 32.1, width: 16, height: 16));
-    MoveResult result = world.move(man, 10, -10, handler: (obj) => Behavior.Touch);
+    MoveResult result =
+        world.move(man, 10, -10, handler: (obj) => Behavior.Touch);
     expect(result.y, closeTo(32.0, 0.01));
     expect(result.x, closeTo(64.1, 0.01));
     expect(result.collisions.length, 1);
@@ -263,7 +266,8 @@ void main() {
     World world = World(1024, 1024);
     world.add(block, AABB.xywh(x: 64, y: 32, width: 16, height: 16));
     world.add(man, AABB.xywh(x: 64, y: 15.9, width: 16, height: 16));
-    MoveResult result = world.move(man, -10, 10, handler: (obj) => Behavior.Touch);
+    MoveResult result =
+        world.move(man, -10, 10, handler: (obj) => Behavior.Touch);
     expect(result.y, closeTo(16.0, 0.01));
     expect(result.x, closeTo(63.9, 0.01));
     expect(result.collisions.length, 1);
@@ -282,5 +286,61 @@ void main() {
     expect(result.y, closeTo(32.0, 0.01));
     expect(result.x, closeTo(32.0, 0.01));
     expect(result.collisions.length, 2);
+  });
+
+  test('simple bounce bottom', () {
+    Object block = Object();
+    Object man = Object();
+    World world = World(1024, 1024);
+    world.add(block, AABB.xywh(x: 48, y: 32, width: 16, height: 16));
+    world.add(man, AABB.xywh(x: 48, y: 14, width: 16, height: 16));
+    MoveResult result =
+        world.move(man, 4, 4, handler: (obj) => Behavior.Bounce);
+    expect(result.x, closeTo(52.0, 0.01));
+    expect(result.y, closeTo(14.0, 0.01));
+    expect(result.collisions.length, 1);
+    expect(result.collisions[0].object, block);
+  });
+
+  test('simple bounce top', () {
+    Object block = Object();
+    Object man = Object();
+    World world = World(1024, 1024);
+    world.add(block, AABB.xywh(x: 48, y: 32, width: 16, height: 16));
+    world.add(man, AABB.xywh(x: 48, y: 50, width: 16, height: 16));
+    MoveResult result =
+        world.move(man, 4, -4, handler: (obj) => Behavior.Bounce);
+    expect(result.x, closeTo(52.0, 0.01));
+    expect(result.y, closeTo(50.0, 0.01));
+    expect(result.collisions.length, 1);
+    expect(result.collisions[0].object, block);
+  });
+
+  test('simple bounce right', () {
+    Object block = Object();
+    Object man = Object();
+    World world = World(1024, 1024);
+    world.add(block, AABB.xywh(x: 48, y: 32, width: 16, height: 16));
+    world.add(man, AABB.xywh(x: 30, y: 32, width: 16, height: 16));
+    MoveResult result =
+        world.move(man, 4, 4, handler: (obj) => Behavior.Bounce);
+    expect(result.x, closeTo(30.0, 0.01));
+    expect(result.y, closeTo(36.0, 0.01));
+    expect(result.collisions.length, 1);
+    expect(result.collisions[0].object, block);
+  });
+
+  test('simple bounce left', () {
+    Object block = Object();
+    Object man = Object();
+    World world = World(1024, 1024);
+    world.add(block, AABB.xywh(x: 48, y: 32, width: 16, height: 16));
+    world.add(man, AABB.xywh(x: 66, y: 32, width: 16, height: 16));
+    MoveResult result =
+        world.move(man, -4, 4, handler: (obj) => Behavior.Bounce);
+    expect(result.x, closeTo(66.0, 0.01));
+    expect(result.y, closeTo(36.0, 0.01));
+    expect(result.collisions.length, 1);
+    expect(result.collisions[0].object, block);
   });
 }
