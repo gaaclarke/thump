@@ -3,6 +3,7 @@
 ## 0.2.0
 
 - Added a Collision object and added the collided edge to the MoveResults.
+- Started returning the dx and dy of the resulting object.
 
 ## 0.1.1
 

@@ -1,5 +1,9 @@
+import 'dart:math';
+
 import 'package:test/test.dart';
 import 'package:thump/thump.dart';
+
+final double sqrt2Reciprocal = 1.0 / sqrt(2.0);
 
 void main() {
   test('queryObject', () {
@@ -302,6 +306,8 @@ void main() {
         world.move(man, 4, 4, handler: (obj) => Behavior.Bounce);
     expect(result.x, closeTo(52.0, 0.01));
     expect(result.y, closeTo(14.0, 0.01));
+    expect(result.dx, closeTo(sqrt2Reciprocal, 0.01));
+    expect(result.dy, closeTo(-sqrt2Reciprocal, 0.01));
     expect(result.collisions.length, 1);
     expect(result.collisions[0].object, block);
   });
@@ -316,6 +322,8 @@ void main() {
         world.move(man, 4, -4, handler: (obj) => Behavior.Bounce);
     expect(result.x, closeTo(52.0, 0.01));
     expect(result.y, closeTo(50.0, 0.01));
+    expect(result.dx, closeTo(sqrt2Reciprocal, 0.01));
+    expect(result.dy, closeTo(sqrt2Reciprocal, 0.01));
     expect(result.collisions.length, 1);
     expect(result.collisions[0].object, block);
   });
@@ -330,6 +338,8 @@ void main() {
         world.move(man, 4, 4, handler: (obj) => Behavior.Bounce);
     expect(result.x, closeTo(30.0, 0.01));
     expect(result.y, closeTo(36.0, 0.01));
+    expect(result.dx, closeTo(-sqrt2Reciprocal, 0.01));
+    expect(result.dy, closeTo(sqrt2Reciprocal, 0.01));
     expect(result.collisions.length, 1);
     expect(result.collisions[0].object, block);
   });
@@ -344,6 +354,8 @@ void main() {
         world.move(man, -4, 4, handler: (obj) => Behavior.Bounce);
     expect(result.x, closeTo(66.0, 0.01));
     expect(result.y, closeTo(36.0, 0.01));
+    expect(result.dx, closeTo(sqrt2Reciprocal, 0.01));
+    expect(result.dy, closeTo(sqrt2Reciprocal, 0.01));
     expect(result.collisions.length, 1);
     expect(result.collisions[0].object, block);
   });

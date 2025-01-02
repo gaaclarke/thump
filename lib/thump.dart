@@ -113,8 +113,13 @@ class AABBPair {
 }
 
 class Collision {
+  /// The object that was collided with.
   final Object object;
+
+  /// The [AABB] of the object that was collided with.
   final AABB aabb;
+
+  /// The edge of the moving [AABB] that collided with [object].
   final Edge edge;
   Collision({required this.object, required this.aabb, required this.edge});
 }
@@ -123,8 +128,21 @@ class Collision {
 class MoveResult {
   final double x;
   final double y;
+
+  /// The resulting normalized direction the object is traveling in the X
+  /// direction.
+  final double dx;
+
+  /// The resulting normalized direction the object is traveling in the Y
+  /// direction.
+  final double dy;
   final List<Collision> collisions;
-  MoveResult(this.x, this.y, this.collisions);
+  MoveResult._make(
+      {required this.x,
+      required this.y,
+      required this.collisions,
+      required this.dx,
+      required this.dy});
 }
 
 class _Node {
@@ -359,6 +377,9 @@ class World {
         height: start.height);
     final AABB union = start.union(end);
     final List<AABBPair> potentials = queryAABB(union, ignore: obj);
+    final length = _length(dx, dy);
+    final double origDirX = dx / length;
+    final double origDirY = dy / length;
     if (potentials.isEmpty) {
       resultX = start.x + dx;
       resultY = start.y + dy;
@@ -369,9 +390,10 @@ class World {
               y: resultY,
               width: start.width,
               height: start.height));
-      return MoveResult(resultX, resultY, []);
+      return MoveResult._make(
+          x: resultX, y: resultY, collisions: [], dx: origDirX, dy: origDirY);
     }
-    final int steps = _length(dx, dy).ceil();
+    final int steps = length.ceil();
     double normDx = dx / steps;
     double normDy = dy / steps;
     bool shouldBreak = false;
@@ -480,6 +502,11 @@ class World {
         AABB.xywh(
             x: resultX, y: resultY, width: start.width, height: start.height));
 
-    return MoveResult(resultX, resultY, collisions);
+    return MoveResult._make(
+        x: resultX,
+        y: resultY,
+        collisions: collisions,
+        dx: (normDx < 0 != dx < 0) ? -origDirX : origDirX,
+        dy: (normDy < 0 != dy < 0) ? -origDirY : origDirY);
   }
 }
