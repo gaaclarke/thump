@@ -1,6 +1,12 @@
 import 'dart:collection';
 import 'dart:math';
 
+class Vector2 {
+  final double x;
+  final double y;
+  Vector2(this.x, this.y);
+}
+
 /// An axis-aligned bounding box.
 class AABB {
   /// The lowest x value for this.
@@ -134,23 +140,18 @@ class Collision {
 
 /// A result from [World.move].
 class MoveResult {
-  final double x;
-  final double y;
+  /// The resulting position of the moved object.
+  final Vector2 position;
 
-  /// The resulting normalized direction the object is traveling in the X
-  /// direction.
-  final double dx;
+  /// The resulting normalized direction the object is traveling.
+  final Vector2 direction;
 
-  /// The resulting normalized direction the object is traveling in the Y
-  /// direction.
-  final double dy;
   final List<Collision> collisions;
-  MoveResult._make(
-      {required this.x,
-      required this.y,
-      required this.collisions,
-      required this.dx,
-      required this.dy});
+  MoveResult._make({
+    required this.position,
+    required this.collisions,
+    required this.direction,
+  });
 }
 
 class _Node {
@@ -399,7 +400,9 @@ class World {
               width: start.width,
               height: start.height));
       return MoveResult._make(
-          x: resultX, y: resultY, collisions: [], dx: origDirX, dy: origDirY);
+          position: Vector2(resultX, resultY),
+          collisions: [],
+          direction: Vector2(origDirX, origDirY));
     }
     final int steps = length.ceil();
     double normDx = dx / steps;
@@ -514,10 +517,10 @@ class World {
             x: resultX, y: resultY, width: start.width, height: start.height));
 
     return MoveResult._make(
-        x: resultX,
-        y: resultY,
-        collisions: collisions,
-        dx: (normDx < 0 != dx < 0) ? -origDirX : origDirX,
-        dy: (normDy < 0 != dy < 0) ? -origDirY : origDirY);
+      position: Vector2(resultX, resultY),
+      collisions: collisions,
+      direction: Vector2((normDx < 0 != dx < 0) ? -origDirX : origDirX,
+          (normDy < 0 != dy < 0) ? -origDirY : origDirY),
+    );
   }
 }
