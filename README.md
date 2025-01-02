@@ -38,7 +38,6 @@ void main() {
 ## To do
 
 - Create infastructure to run all benchmarks.
-- Report the location where the collision happened somehow.
 
 ## Potential optimizations
 

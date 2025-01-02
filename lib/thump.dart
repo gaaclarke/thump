@@ -131,11 +131,16 @@ class Collision {
   /// The behavior executed at the collision.
   final Behavior behavior;
 
-  Collision(
-      {required this.object,
-      required this.aabb,
-      required this.edge,
-      required this.behavior});
+  /// The position of the object's top left hand corner at the point of impact.
+  final Vector2 collisionPosition;
+
+  Collision({
+    required this.object,
+    required this.aabb,
+    required this.edge,
+    required this.behavior,
+    required this.collisionPosition,
+  });
 }
 
 /// A result from [World.move].
@@ -147,6 +152,7 @@ class MoveResult {
   final Vector2 direction;
 
   final List<Collision> collisions;
+
   MoveResult._make({
     required this.position,
     required this.collisions,
@@ -425,35 +431,44 @@ class World {
               dx,
               dy);
           Behavior behavior = handler(potential.object);
+          late final Vector2 collisionPosition;
+          switch (closest) {
+            case Edge.top:
+              final double y = max(nextY, potential.aabb.bottom);
+              double moveRatio = (y - resultY) / normDy;
+              final double x = resultX + normDx * moveRatio;
+              collisionPosition = Vector2(x, y);
+            case Edge.right:
+              final double x = min(nextX, potential.aabb.x - start.width);
+              double moveRatio = (x - resultX) / normDx;
+              final double y = resultY + normDy * moveRatio;
+              collisionPosition = Vector2(x, y);
+            case Edge.bottom:
+              final double y = min(nextY, potential.aabb.y - start.height);
+              double moveRatio = (y - resultY) / normDy;
+              final double x = resultX + normDx * moveRatio;
+              collisionPosition = Vector2(x, y);
+            case Edge.left:
+              final double x = max(nextX, potential.aabb.right);
+              double moveRatio = (x - resultX) / normDx;
+              final double y = resultY + normDy * moveRatio;
+              collisionPosition = Vector2(x, y);
+          }
+
           if (!collisionObjects.contains(potential.object)) {
             collisions.add(Collision(
                 object: potential.object,
                 aabb: potential.aabb,
                 edge: closest,
-                behavior: behavior));
+                behavior: behavior,
+                collisionPosition: collisionPosition));
             collisionObjects.add(potential.object);
           }
           switch (behavior) {
             case Behavior.Touch:
               shouldBreak = true;
-              switch (closest) {
-                case Edge.top:
-                  nextY = max(nextY, potential.aabb.bottom);
-                  double moveRatio = (nextY - start.y) / normDy;
-                  nextX = resultX + normDx * moveRatio;
-                case Edge.right:
-                  nextX = min(nextX, potential.aabb.x - start.width);
-                  double moveRatio = (nextX - start.x) / normDx;
-                  nextY = resultY + normDy * moveRatio;
-                case Edge.bottom:
-                  nextY = min(nextY, potential.aabb.y - start.height);
-                  double moveRatio = (nextY - start.y) / normDy;
-                  nextX = resultX + normDx * moveRatio;
-                case Edge.left:
-                  nextX = max(nextX, potential.aabb.right);
-                  double moveRatio = (nextX - start.x) / normDx;
-                  nextY = resultY + normDy * moveRatio;
-              }
+              nextY = collisionPosition.y;
+              nextX = collisionPosition.x;
               break;
             case Behavior.Slide:
               switch (closest) {

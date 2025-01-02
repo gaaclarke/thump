@@ -94,6 +94,8 @@ void main() {
     expect(result.collisions.length, 1);
     expect(result.collisions[0].object, block);
     expect(result.collisions[0].edge, Edge.right);
+    expect(result.collisions[0].collisionPosition.x, closeTo(48.0, 0.01));
+    expect(result.collisions[0].collisionPosition.y, closeTo(16.0, 0.01));
   });
 
   test('simple slide right tiny', () {
@@ -311,6 +313,8 @@ void main() {
     expect(result.direction.y, closeTo(-sqrt2Reciprocal, 0.01));
     expect(result.collisions.length, 1);
     expect(result.collisions[0].object, block);
+    expect(result.collisions[0].collisionPosition.x, closeTo(50.0, 0.01));
+    expect(result.collisions[0].collisionPosition.y, closeTo(16.0, 0.01));
   });
 
   test('simple bounce top', () {

@@ -6,6 +6,7 @@
 - Started returning the dx and dy of the resulting object.
 - Started reporting the behavior that was used for collisions.
 - Introduced Vector2.
+- Added the collision location to the MoveResult.
 
 ## 0.1.1
 
