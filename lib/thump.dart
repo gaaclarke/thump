@@ -121,7 +121,15 @@ class Collision {
 
   /// The edge of the moving [AABB] that collided with [object].
   final Edge edge;
-  Collision({required this.object, required this.aabb, required this.edge});
+
+  /// The behavior executed at the collision.
+  final Behavior behavior;
+
+  Collision(
+      {required this.object,
+      required this.aabb,
+      required this.edge,
+      required this.behavior});
 }
 
 /// A result from [World.move].
@@ -413,12 +421,15 @@ class World {
               potential.aabb,
               dx,
               dy);
+          Behavior behavior = handler(potential.object);
           if (!collisionObjects.contains(potential.object)) {
             collisions.add(Collision(
-                object: potential.object, aabb: potential.aabb, edge: closest));
+                object: potential.object,
+                aabb: potential.aabb,
+                edge: closest,
+                behavior: behavior));
             collisionObjects.add(potential.object);
           }
-          Behavior behavior = handler(potential.object);
           switch (behavior) {
             case Behavior.Touch:
               shouldBreak = true;

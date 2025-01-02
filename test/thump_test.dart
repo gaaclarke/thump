@@ -190,6 +190,7 @@ void main() {
     expect(result.collisions.length, 1);
     expect(result.collisions[0].object, block);
     expect(result.collisions[0].edge, Edge.top);
+    expect(result.collisions[0].behavior, Behavior.Slide);
   });
 
   test('slide slip by', () {
@@ -358,5 +359,6 @@ void main() {
     expect(result.dy, closeTo(sqrt2Reciprocal, 0.01));
     expect(result.collisions.length, 1);
     expect(result.collisions[0].object, block);
+    expect(result.collisions[0].behavior, Behavior.Bounce);
   });
 }
