@@ -8,8 +8,7 @@ A simple 2D collision system for axis-aligned bounding boxes.
 
 - Tunneling - No matter the speed of an object it will hit anything it collides
   with, provided the dimensions of the objects is >= 1.
-- Slide, Pass, Touch, Bounce (unimplemented) behaviors when
-  resolving collisions.
+- Slide, Pass, Touch, Bounce behaviors when resolving collisions.
 
 ## Example
 
@@ -38,7 +37,6 @@ void main() {
 
 ## To do
 
-- Implement Bounce behavior
 - Create infastructure to run all benchmarks
 - Report which edges collided in results
 - Report new movement vector in MoveResult (required for Bounce)

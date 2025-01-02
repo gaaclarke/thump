@@ -7,6 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:thump/thump.dart' as thump;
 
+// How much energy is maintained when a bounce happens.
+const double bounceCoefficient = 0.9;
+// How much downward force is required to activate bouncing.  You don't want it
+// to bounce while walking over it.
+const double bounceActivation = 0.5;
 thump.World gWorld = thump.World(5120, 288);
 
 class Ninja extends RectangleComponent with KeyboardHandler {
@@ -21,10 +26,7 @@ class Ninja extends RectangleComponent with KeyboardHandler {
 
   @override
   FutureOr<void> onLoad() {
-    gWorld.add(
-        this,
-        thump.AABB.xywh(
-            x: x, y: y, width: width, height: height));
+    gWorld.add(this, thump.AABB.xywh(x: x, y: y, width: width, height: height));
   }
 
   @override
@@ -62,6 +64,9 @@ class Ninja extends RectangleComponent with KeyboardHandler {
 
     _onPlatform = false;
     thump.MoveResult result = gWorld.move(this, dx, dy, handler: (Object obj) {
+      if (obj is Block && obj.bouncy && _dy >= bounceActivation) {
+        return thump.Behavior.Bounce;
+      }
       if (keysPressed.contains(LogicalKeyboardKey.keyZ)) {
         return thump.Behavior.Touch;
       } else {
@@ -76,11 +81,20 @@ class Ninja extends RectangleComponent with KeyboardHandler {
           _isStuck = true;
         }
         if (result.y >= collision.aabb.bottom && dy <= 0) {
+          // Hit your head.
           _dy = 0;
         }
         if (result.y + height <= collision.aabb.y && dy >= 0) {
-          _dy = 0;
-          _onPlatform = true;
+          // Hit your feet.
+          final Object hitObject = result.collisions[0].object;
+          if (hitObject is Block &&
+              hitObject.bouncy == true &&
+              _dy >= bounceActivation) {
+            _dy *= -bounceCoefficient;
+          } else {
+            _dy = 0;
+            _onPlatform = true;
+          }
         }
       }
     }
@@ -102,26 +116,29 @@ class Ninja extends RectangleComponent with KeyboardHandler {
 }
 
 class Block extends RectangleComponent {
+  final bool bouncy;
+
+  Block({this.bouncy = false});
+
   @override
   FutureOr<void> onLoad() {
-    gWorld.add(
-        this,
-        thump.AABB.xywh(
-            x: x, y: y, width: width, height: height));
+    gWorld.add(this, thump.AABB.xywh(x: x, y: y, width: width, height: height));
   }
 
   @override
   void render(Canvas canvas) {
-    canvas.drawRect(Rect.fromLTWH(0, 0, width, height),
-        Paint()..color = Color.fromARGB(255, 0, 255, 8));
+    final Color color = bouncy
+        ? Color.fromARGB(255, 233, 97, 29)
+        : Color.fromARGB(255, 0, 255, 8);
+    canvas.drawRect(Rect.fromLTWH(0, 0, width, height), Paint()..color = color);
   }
 }
 
 class NinjaWorld extends World {
   @override
   Future<void> onLoad() async {
-    void addBlock(double x, double y) {
-      final block = Block();
+    void addBlock(double x, double y, {bool bouncy = false}) {
+      final block = Block(bouncy: bouncy);
       block.position = Vector2(x, y);
       block.size = Vector2(16, 16);
       add(block);
@@ -133,6 +150,7 @@ class NinjaWorld extends World {
 
     addBlock(100, 100);
     addBlock(160, 184);
+    addBlock(200, 184, bouncy: true);
 
     final ninja = Ninja();
     ninja.position = Vector2(0, 0);

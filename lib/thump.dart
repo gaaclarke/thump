@@ -364,8 +364,8 @@ class World {
       return MoveResult(resultX, resultY, []);
     }
     final int steps = _length(dx, dy).ceil();
-    final double normDx = dx / steps;
-    final double normDy = dy / steps;
+    double normDx = dx / steps;
+    double normDy = dy / steps;
     bool shouldBreak = false;
     for (int i = 0; i < steps; ++i) {
       double nextX = resultX + normDx;
@@ -431,7 +431,48 @@ class World {
             case Behavior.Pass:
               break;
             case Behavior.Bounce:
-              throw UnimplementedError('Bounce is not implemented.');
+              final _Edge closest = _calcClosestEdge(
+                  AABB.xywh(
+                      x: resultX,
+                      y: resultY,
+                      width: start.width,
+                      height: start.height),
+                  potential.aabb,
+                  dx,
+                  dy);
+              switch (closest) {
+                case _Edge.top:
+                  final double impactY = max(nextY, potential.aabb.bottom);
+                  final double moveRatio = (impactY - resultY) / normDy;
+                  nextY = resultY +
+                      normDy * moveRatio +
+                      (-normDy * (1 - moveRatio));
+                  normDy *= -1;
+                case _Edge.right:
+                  final double impactX =
+                      min(nextX, potential.aabb.x - start.width);
+                  final double moveRatio = (impactX - resultX) / normDx;
+                  nextX = resultX +
+                      normDx * moveRatio +
+                      (-normDx * (1 - moveRatio));
+                  normDx *= -1;
+                case _Edge.bottom:
+                  final double impactY =
+                      min(nextY, potential.aabb.y - start.height);
+                  final double moveRatio = (impactY - resultY) / normDy;
+                  nextY = resultY +
+                      normDy * moveRatio +
+                      (-normDy * (1 - moveRatio));
+                  normDy *= -1;
+                case _Edge.left:
+                  final double impactX = max(nextX, potential.aabb.right);
+                  final double moveRatio = (impactX - resultX) / normDx;
+                  nextX = resultX +
+                      normDx * moveRatio +
+                      (-normDx * (1 - moveRatio));
+                  normDx *= -1;
+              }
+              break;
           }
         }
       }
