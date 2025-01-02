@@ -37,9 +37,8 @@ void main() {
 
 ## To do
 
-- Create infastructure to run all benchmarks
-- Report which edges collided in results
-- Report new movement vector in MoveResult (required for Bounce)
+- Create infastructure to run all benchmarks.
+- Report the location where the collision happened somehow.
 
 ## Potential optimizations
 
