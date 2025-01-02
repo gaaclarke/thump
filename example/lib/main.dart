@@ -80,15 +80,13 @@ class Ninja extends RectangleComponent with KeyboardHandler {
           _onPlatform = true;
           _isStuck = true;
         }
-        if (result.y >= collision.aabb.bottom && dy <= 0) {
+        if (result.position.y >= collision.aabb.bottom && dy <= 0) {
           // Hit your head.
           _dy = 0;
         }
-        if (result.y + height <= collision.aabb.y && dy >= 0) {
+        if (result.position.y + height <= collision.aabb.y && dy >= 0) {
           // Hit your feet.
-          final Object hitObject = result.collisions[0].object;
-          if (hitObject is Block &&
-              hitObject.bouncy == true &&
+          if (collision.behavior == thump.Behavior.Bounce &&
               _dy >= bounceActivation) {
             _dy *= -bounceCoefficient;
           } else {
@@ -98,7 +96,7 @@ class Ninja extends RectangleComponent with KeyboardHandler {
         }
       }
     }
-    position = Vector2(result.x, result.y);
+    position = Vector2(result.position.x, result.position.y);
   }
 
   @override

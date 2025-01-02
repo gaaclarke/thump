@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0
+
+- Added a Collision object and added the collided edge to the MoveResults.
+- Started returning the dx and dy of the resulting object.
+- Started reporting the behavior that was used for collisions.
+- Introduced Vector2.
+- Added the collision location to the MoveResult.
+
 ## 0.1.1
 
 - Implemented bounce
