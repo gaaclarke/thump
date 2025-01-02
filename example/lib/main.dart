@@ -24,12 +24,12 @@ class Ninja extends RectangleComponent with KeyboardHandler {
     gWorld.add(
         this,
         thump.AABB.xywh(
-            x: this.x, y: this.y, width: this.width, height: this.height));
+            x: x, y: y, width: width, height: height));
   }
 
   @override
   void render(Canvas canvas) {
-    canvas.drawCircle(Offset(this.size.x / 2, this.size.y / 2), this.size.x / 2,
+    canvas.drawCircle(Offset(size.x / 2, size.y / 2), size.x / 2,
         Paint()..color = Color.fromARGB(255, 178, 186, 247));
   }
 
@@ -68,7 +68,7 @@ class Ninja extends RectangleComponent with KeyboardHandler {
         return thump.Behavior.Slide;
       }
     });
-    if (result.collisions.length > 0) {
+    if (result.collisions.isNotEmpty) {
       for (final collision in result.collisions) {
         if (keysPressed.contains(LogicalKeyboardKey.keyZ)) {
           _dy = 0;
@@ -84,14 +84,15 @@ class Ninja extends RectangleComponent with KeyboardHandler {
         }
       }
     }
-    this.position = Vector2(result.x, result.y);
+    position = Vector2(result.x, result.y);
   }
 
+  @override
   bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    this.keysDown.clear();
+    keysDown.clear();
     for (final key in keysPressed) {
       if (!this.keysPressed.contains(key)) {
-        this.keysDown.add(key);
+        keysDown.add(key);
       }
     }
     this.keysPressed.clear();
@@ -106,12 +107,12 @@ class Block extends RectangleComponent {
     gWorld.add(
         this,
         thump.AABB.xywh(
-            x: this.x, y: this.y, width: this.width, height: this.height));
+            x: x, y: y, width: width, height: height));
   }
 
   @override
   void render(Canvas canvas) {
-    canvas.drawRect(Rect.fromLTWH(0, 0, this.width, this.height),
+    canvas.drawRect(Rect.fromLTWH(0, 0, width, height),
         Paint()..color = Color.fromARGB(255, 0, 255, 8));
   }
 }
