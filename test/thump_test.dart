@@ -269,4 +269,18 @@ void main() {
     expect(result.collisions.length, 1);
     expect(result.collisions[0].object, block);
   });
+
+  test('slide in corner', () {
+    Object blockRight = Object();
+    Object blockDown = Object();
+    Object man = Object();
+    World world = World(1024, 1024);
+    world.add(blockRight, AABB.xywh(x: 48, y: 32, width: 16, height: 16));
+    world.add(blockDown, AABB.xywh(x: 32, y: 48, width: 16, height: 16));
+    world.add(man, AABB.xywh(x: 31, y: 31, width: 16, height: 16));
+    MoveResult result = world.move(man, 2, 2);
+    expect(result.y, closeTo(32.0, 0.01));
+    expect(result.x, closeTo(32.0, 0.01));
+    expect(result.collisions.length, 2);
+  });
 }

@@ -48,6 +48,8 @@ void main() {
    hull around starting and ending AABB.
 1) Sort potential collisions based on their distance to the starting point.
 1) Have a private AABB that is mutable to avoid generating garbage.
+1) Make potentials come back as a mini quadtree
+1) Divide large Move()'s into smaller moves
 
 ## Recognitions
 

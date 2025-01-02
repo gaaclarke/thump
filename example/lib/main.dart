@@ -119,17 +119,19 @@ class Block extends RectangleComponent {
 class NinjaWorld extends World {
   @override
   Future<void> onLoad() async {
-    for (int i = 0; i < 20; ++i) {
+    void addBlock(double x, double y) {
       final block = Block();
-      block.position = Vector2(i * 16, 200);
+      block.position = Vector2(x, y);
       block.size = Vector2(16, 16);
       add(block);
     }
 
-    final block = Block();
-    block.position = Vector2(100, 100);
-    block.size = Vector2(16, 16);
-    add(block);
+    for (int i = 0; i < 20; ++i) {
+      addBlock(i * 16, 200);
+    }
+
+    addBlock(100, 100);
+    addBlock(160, 184);
 
     final ninja = Ninja();
     ninja.position = Vector2(0, 0);

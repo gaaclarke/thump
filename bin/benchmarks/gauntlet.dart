@@ -27,11 +27,12 @@ void main() {
   Object man = Object();
   world.add(man, AABB.xywh(x: 0, y: column * tileSize, width: 16, height: 16));
 
+  const int iterations = 10;
+  const int moveCount = (tileWidth - 1) * 16;
+
   Stopwatch stopwatch = Stopwatch();
   stopwatch.start();
 
-  const int iterations = 10;
-  const int moveCount = (tileWidth - 1) * 16;
   for (int i = 0; i < iterations; ++i) {
     for (int j = 0; j < moveCount; ++j) {
       world.move(man, 1, 0);
@@ -40,7 +41,7 @@ void main() {
       world.move(man, -1, 0);
     }
   }
+  stopwatch.stop();
   int count = iterations * moveCount * 2;
-
   print('${stopwatch.elapsedMilliseconds / count} ms per move');
 }
