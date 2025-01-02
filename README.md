@@ -41,6 +41,7 @@ void main() {
 - Implement Bounce behavior
 - Create infastructure to run all benchmarks
 - Report which edges collided in results
+- Report new movement vector in MoveResult (required for Bounce)
 
 ## Potential optimizations
 
