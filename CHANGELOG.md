@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0
+
+- Added a Collision object and added the collided edge to the MoveResults.
+
 ## 0.1.1
 
 - Implemented bounce

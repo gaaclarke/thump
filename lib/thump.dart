@@ -112,11 +112,18 @@ class AABBPair {
   AABBPair(this.object, this.aabb);
 }
 
+class Collision {
+  final Object object;
+  final AABB aabb;
+  final Edge edge;
+  Collision({required this.object, required this.aabb, required this.edge});
+}
+
 /// A result from [World.move].
 class MoveResult {
   final double x;
   final double y;
-  final List<AABBPair> collisions;
+  final List<Collision> collisions;
   MoveResult(this.x, this.y, this.collisions);
 }
 
@@ -130,36 +137,36 @@ class _Node {
   Map<Object, AABB> _entries = {};
 }
 
-enum _Edge { top, right, bottom, left }
+enum Edge { top, right, bottom, left }
 
-_Edge _calcClosestEdge(AABB a, AABB b, double dx, double dy) {
-  _Edge? result;
+Edge _calcClosestEdge(AABB a, AABB b, double dx, double dy) {
+  Edge? result;
   double minDist = double.infinity;
   if (dx >= 0) {
     double dist = (a.right - b.x).abs();
     if (dist < minDist) {
-      result = _Edge.right;
+      result = Edge.right;
       minDist = dist;
     }
   }
   if (dx <= 0) {
     double dist = (a.x - b.right).abs();
     if (dist < minDist) {
-      result = _Edge.left;
+      result = Edge.left;
       minDist = dist;
     }
   }
   if (dy >= 0) {
     double dist = (a.bottom - b.y).abs();
     if (dist < minDist) {
-      result = _Edge.bottom;
+      result = Edge.bottom;
       minDist = dist;
     }
   }
   if (dy <= 0) {
     double dist = (a.y - b.bottom).abs();
     if (dist < minDist) {
-      result = _Edge.top;
+      result = Edge.top;
       minDist = dist;
     }
   }
@@ -343,7 +350,8 @@ class World {
     final AABB start = _aabbs[obj]!;
     double resultX = start.x;
     double resultY = start.y;
-    Set<Object> collisions = {};
+    Set<Object> collisionObjects = {};
+    List<Collision> collisions = [];
     final AABB end = AABB.xywh(
         x: start.x + dx,
         y: start.y + dy,
@@ -374,81 +382,67 @@ class World {
           x: nextX, y: nextY, width: start.width, height: start.height);
       for (AABBPair potential in potentials) {
         if (nextAABB.overlaps(potential.aabb)) {
-          collisions.add(potential.object);
+          final Edge closest = _calcClosestEdge(
+              AABB.xywh(
+                  x: resultX,
+                  y: resultY,
+                  width: start.width,
+                  height: start.height),
+              potential.aabb,
+              dx,
+              dy);
+          if (!collisionObjects.contains(potential.object)) {
+            collisions.add(Collision(
+                object: potential.object, aabb: potential.aabb, edge: closest));
+            collisionObjects.add(potential.object);
+          }
           Behavior behavior = handler(potential.object);
           switch (behavior) {
             case Behavior.Touch:
               shouldBreak = true;
-              final _Edge closest = _calcClosestEdge(
-                  AABB.xywh(
-                      x: resultX,
-                      y: resultY,
-                      width: start.width,
-                      height: start.height),
-                  potential.aabb,
-                  dx,
-                  dy);
               switch (closest) {
-                case _Edge.top:
+                case Edge.top:
                   nextY = max(nextY, potential.aabb.bottom);
                   double moveRatio = (nextY - start.y) / normDy;
                   nextX = resultX + normDx * moveRatio;
-                case _Edge.right:
+                case Edge.right:
                   nextX = min(nextX, potential.aabb.x - start.width);
                   double moveRatio = (nextX - start.x) / normDx;
                   nextY = resultY + normDy * moveRatio;
-                case _Edge.bottom:
+                case Edge.bottom:
                   nextY = min(nextY, potential.aabb.y - start.height);
                   double moveRatio = (nextY - start.y) / normDy;
                   nextX = resultX + normDx * moveRatio;
-                case _Edge.left:
+                case Edge.left:
                   nextX = max(nextX, potential.aabb.right);
                   double moveRatio = (nextX - start.x) / normDx;
                   nextY = resultY + normDy * moveRatio;
               }
               break;
             case Behavior.Slide:
-              final _Edge closest = _calcClosestEdge(
-                  AABB.xywh(
-                      x: resultX,
-                      y: resultY,
-                      width: start.width,
-                      height: start.height),
-                  potential.aabb,
-                  dx,
-                  dy);
               switch (closest) {
-                case _Edge.top:
+                case Edge.top:
                   nextY = max(nextY, potential.aabb.bottom);
-                case _Edge.right:
+                case Edge.right:
                   nextX = min(nextX, potential.aabb.x - start.width);
-                case _Edge.bottom:
+                case Edge.bottom:
                   nextY = min(nextY, potential.aabb.y - start.height);
-                case _Edge.left:
+                case Edge.left:
                   nextX = max(nextX, potential.aabb.right);
               }
               break;
             case Behavior.Pass:
               break;
             case Behavior.Bounce:
-              final _Edge closest = _calcClosestEdge(
-                  AABB.xywh(
-                      x: resultX,
-                      y: resultY,
-                      width: start.width,
-                      height: start.height),
-                  potential.aabb,
-                  dx,
-                  dy);
               switch (closest) {
-                case _Edge.top:
+                case Edge.top:
                   final double impactY = max(nextY, potential.aabb.bottom);
                   final double moveRatio = (impactY - resultY) / normDy;
                   nextY = resultY +
                       normDy * moveRatio +
                       (-normDy * (1 - moveRatio));
                   normDy *= -1;
-                case _Edge.right:
+                case Edge.right:
                   final double impactX =
                       min(nextX, potential.aabb.x - start.width);
                   final double moveRatio = (impactX - resultX) / normDx;
@@ -456,7 +450,7 @@ class World {
                       normDx * moveRatio +
                       (-normDx * (1 - moveRatio));
                   normDx *= -1;
-                case _Edge.bottom:
+                case Edge.bottom:
                   final double impactY =
                       min(nextY, potential.aabb.y - start.height);
                   final double moveRatio = (impactY - resultY) / normDy;
@@ -464,7 +458,7 @@ class World {
                       normDy * moveRatio +
                       (-normDy * (1 - moveRatio));
                   normDy *= -1;
-                case _Edge.left:
+                case Edge.left:
                   final double impactX = max(nextX, potential.aabb.right);
                   final double moveRatio = (impactX - resultX) / normDx;
                   nextX = resultX +
@@ -486,7 +480,6 @@ class World {
         AABB.xywh(
             x: resultX, y: resultY, width: start.width, height: start.height));
 
-    return MoveResult(resultX, resultY,
-        collisions.map((Object obj) => AABBPair(obj, _aabbs[obj]!)).toList());
+    return MoveResult(resultX, resultY, collisions);
   }
 }

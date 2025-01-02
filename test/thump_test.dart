@@ -89,6 +89,7 @@ void main() {
     expect(result.y, closeTo(16.0, 0.01));
     expect(result.collisions.length, 1);
     expect(result.collisions[0].object, block);
+    expect(result.collisions[0].edge, Edge.right);
   });
 
   test('simple slide right tiny', () {
@@ -130,6 +131,7 @@ void main() {
     expect(result.y, closeTo(16.0, 0.01));
     expect(result.collisions.length, 1);
     expect(result.collisions[0].object, block);
+    expect(result.collisions[0].edge, Edge.bottom);
   });
 
   test('simple slide down right fractional', () {
@@ -169,6 +171,7 @@ void main() {
     expect(result.y, closeTo(16.0, 0.01));
     expect(result.collisions.length, 1);
     expect(result.collisions[0].object, block);
+    expect(result.collisions[0].edge, Edge.left);
   });
 
   test('simple slide up', () {
@@ -182,6 +185,7 @@ void main() {
     expect(result.y, closeTo(32.0, 0.01));
     expect(result.collisions.length, 1);
     expect(result.collisions[0].object, block);
+    expect(result.collisions[0].edge, Edge.top);
   });
 
   test('slide slip by', () {
