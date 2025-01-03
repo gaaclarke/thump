@@ -1,7 +1,7 @@
 name: thump
 description: A simple axis-aligned bounding box collisions system.
 repository: https://github.com/gaaclarke/thump
-version: 0.2.0
+version: 0.2.1
 environment:
   sdk: '^3.0.0'
 dev_dependencies:
