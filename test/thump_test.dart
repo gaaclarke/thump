@@ -365,4 +365,13 @@ void main() {
     expect(result.collisions[0].object, block);
     expect(result.collisions[0].behavior, Behavior.Bounce);
   });
+
+  test('move zero', () {
+    Object man = Object();
+    World world = World(1024, 1024);
+    world.add(man, AABB.xywh(x: 64, y: 32, width: 16, height: 16));
+    MoveResult result = world.move(man, 0, 0);
+    expect(result.direction.x, closeTo(0, 0.01));
+    expect(result.direction.y, closeTo(0, 0.01));
+  });
 }

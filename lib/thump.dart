@@ -393,8 +393,8 @@ class World {
     final AABB union = start.union(end);
     final List<AABBPair> potentials = queryAABB(union, ignore: obj);
     final length = _length(dx, dy);
-    final double origDirX = dx / length;
-    final double origDirY = dy / length;
+    final double origDirX = length > 0 ? dx / length : 0;
+    final double origDirY = length > 0 ? dy / length : 0;
     if (potentials.isEmpty) {
       resultX = start.x + dx;
       resultY = start.y + dy;

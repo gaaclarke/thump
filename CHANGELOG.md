@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+- Made MoveResult.direction report zero when moving zero.
+
 ## 0.2.0
 
 - Added a Collision object and added the collided edge to the MoveResults.
